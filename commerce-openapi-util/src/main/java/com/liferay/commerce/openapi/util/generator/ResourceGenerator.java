@@ -227,7 +227,11 @@ public class ResourceGenerator {
 			for (Response response : method.getResponses()) {
 				if (response.hasContent()) {
 					sb.append("\t@Produces(\"");
-					sb.append(response.getContent());
+
+					Content content = response.getContent();
+
+					sb.append(content.getMimeType());
+
 					sb.append("\")\n");
 				}
 			}
