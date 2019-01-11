@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,19 +173,30 @@ public class OSGiRESTModuleGenerator {
 
 			_writeGradleSource();
 
+			Set<ComponentDefinition> componentDefinitions =
+				definition.getComponentDefinitions();
+
+			Stream<ComponentDefinition> componentDefinitionStream =
+				componentDefinitions.stream();
+
+			Set<ComponentDefinition> schemaComponents =
+				componentDefinitionStream.filter(
+					componentDefinition -> !componentDefinition.isParameter()
+				).collect(
+					Collectors.toSet()
+				);
+
 			Set<String> referencedModels = new HashSet<>();
 
 			for (Path path : definition.getPaths()) {
 				referencedModels.addAll(path.getReferencedModels());
 
-				_writeResourceInterfaceSource(definition.getVersion(), path);
+				_writeResourceInterfaceSource(
+					definition.getVersion(), path, schemaComponents);
 
 				_writeResourceImplementationSource(
-					definition.getVersion(), path);
+					definition.getVersion(), path, schemaComponents);
 			}
-
-			Set<ComponentDefinition> componentDefinitions =
-				definition.getComponentDefinitions();
 
 			for (ComponentDefinition componentDefinition :
 					componentDefinitions) {
@@ -394,7 +407,9 @@ public class OSGiRESTModuleGenerator {
 		_writeSource(dtoSource, componentSourcePath);
 	}
 
-	private void _writeResourceImplementationSource(String version, Path path)
+	private void _writeResourceImplementationSource(
+			String version, Path path,
+			Set<ComponentDefinition> schemaComponents)
 		throws IOException {
 
 		String resourceImplementationClassName = StringUtils.upperCaseFirstChar(
@@ -462,12 +477,14 @@ public class OSGiRESTModuleGenerator {
 		osgiResourceComponent = osgiResourceComponent.replace(
 			"${METHODS}",
 			_resourceGenerator.toResourceImplementationMethods(
-				path.getMethods()));
+				path.getMethods(), schemaComponents));
 
 		_writeSource(osgiResourceComponent, componentSourcePath);
 	}
 
-	private void _writeResourceInterfaceSource(String version, Path path)
+	private void _writeResourceInterfaceSource(
+			String version, Path path,
+			Set<ComponentDefinition> schemaComponents)
 		throws IOException {
 
 		String osgiResourceComponent = _getTemplate(
@@ -502,7 +519,8 @@ public class OSGiRESTModuleGenerator {
 
 		osgiResourceComponent = osgiResourceComponent.replace(
 			"${METHODS}",
-			_resourceGenerator.toResourceInterfaceMethods(path.getMethods()));
+			_resourceGenerator.toResourceInterfaceMethods(
+				path.getMethods(), schemaComponents));
 
 		String componentSourcePath = _getClassSourcePath(
 			resourceInterfaceClassName + ".java",
