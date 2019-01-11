@@ -14,16 +14,21 @@
 
 package com.liferay.commerce.openapi.util.generator;
 
+import com.liferay.commerce.openapi.util.ComponentDefinition;
+import com.liferay.commerce.openapi.util.Content;
 import com.liferay.commerce.openapi.util.Method;
 import com.liferay.commerce.openapi.util.Parameter;
 import com.liferay.commerce.openapi.util.Path;
 import com.liferay.commerce.openapi.util.Response;
+import com.liferay.commerce.openapi.util.Schema;
 import com.liferay.commerce.openapi.util.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * @author Igor Beslic
@@ -176,7 +181,9 @@ public class ResourceGenerator {
 		return sb.toString();
 	}
 
-	public String toResourceImplementationMethods(List<Method> methods) {
+	public String toResourceImplementationMethods(
+		List<Method> methods, Set<ComponentDefinition> schemaComponents) {
+
 		StringBuilder sb = new StringBuilder();
 
 		Iterator<Method> iterator = methods.iterator();
@@ -186,14 +193,20 @@ public class ResourceGenerator {
 
 			sb.append("\t@Override\n");
 
-			_appendMethodDeclaration(sb, method, false);
+			_appendMethodDeclaration(sb, method, false, schemaComponents);
 
 			sb.append(" {\n");
 
 			if (method.hasResponseContent()) {
-				sb.append("\t\treturn Response.ok(\n");
-				sb.append("\t\t\t\"Here goes output\", ");
-				sb.append("MediaType.APPLICATION_JSON\n\t\t).build();\n");
+				ComponentDefinition schemaComponent = _getSchemaComponent(
+					method, schemaComponents);
+
+				if (Objects.equals(schemaComponent.getType(), "array")) {
+					sb.append("\t\treturn Collections.emptyList();\n");
+				}
+				else {
+					sb.append("\t\treturn null;\n");
+				}
 			}
 			else {
 				sb.append("\t\treturn Response.ok().build();\n");
@@ -209,7 +222,9 @@ public class ResourceGenerator {
 		return sb.toString();
 	}
 
-	public String toResourceInterfaceMethods(List<Method> methods) {
+	public String toResourceInterfaceMethods(
+		List<Method> methods, Set<ComponentDefinition> schemaComponents) {
+
 		StringBuilder sb = new StringBuilder();
 
 		Iterator<Method> iterator = methods.iterator();
@@ -242,7 +257,7 @@ public class ResourceGenerator {
 				sb.append("\")\n");
 			}
 
-			_appendMethodDeclaration(sb, method, true);
+			_appendMethodDeclaration(sb, method, true, schemaComponents);
 
 			sb.append(";\n");
 
@@ -255,9 +270,12 @@ public class ResourceGenerator {
 	}
 
 	private void _appendMethodDeclaration(
-		StringBuilder sb, Method method, boolean annotateParameter) {
+		StringBuilder sb, Method method, boolean annotateParameter,
+		Set<ComponentDefinition> schemaComponents) {
 
-		sb.append("\tpublic Response ");
+		sb.append("\tpublic ");
+
+		_appendReturnValue(sb, method, schemaComponents);
 
 		sb.append(method.getName());
 
@@ -285,6 +303,79 @@ public class ResourceGenerator {
 		}
 
 		sb.append(")");
+	}
+
+	private void _appendReturnValue(
+		StringBuilder sb, Method method,
+		Set<ComponentDefinition> schemaComponents) {
+
+		if (method.hasResponseContent()) {
+			ComponentDefinition schemaComponent = _getSchemaComponent(
+				method, schemaComponents);
+
+			String itemsReferenceModel =
+				schemaComponent.getItemsReferencedModel();
+
+			if (Objects.equals(schemaComponent.getType(), "array") &&
+				(itemsReferenceModel != null)) {
+
+				schemaComponent = _getSchemaComponent(
+					itemsReferenceModel, schemaComponents);
+
+				sb.append("List<");
+				sb.append(schemaComponent.getName());
+				sb.append("DTO> ");
+			}
+			else if (Objects.equals(schemaComponent.getType(), "object")) {
+				sb.append(schemaComponent.getName());
+				sb.append("DTO ");
+			}
+			else {
+				sb.append("Response ");
+			}
+		}
+		else {
+			sb.append("Response ");
+		}
+	}
+
+	private Content _getResponseContent(List<Response> responses) {
+		Stream<Response> responseStream = responses.stream();
+
+		return responseStream.filter(
+			response -> response.getContent() != null
+		).findFirst(
+		).map(
+			Response::getContent
+		).orElse(
+			null
+		);
+	}
+
+	private ComponentDefinition _getSchemaComponent(
+		Method method, Set<ComponentDefinition> schemaComponents) {
+
+		Content content = _getResponseContent(method.getResponses());
+
+		Schema schema = content.getSchema();
+
+		return _getSchemaComponent(
+			schema.getReferencedModel(), schemaComponents);
+	}
+
+	private ComponentDefinition _getSchemaComponent(
+		String name, Set<ComponentDefinition> schemaComponents) {
+
+		Stream<ComponentDefinition> componentDefinitionStream =
+			schemaComponents.stream();
+
+		return componentDefinitionStream.filter(
+			componentDefinition ->
+				Objects.equals(name, componentDefinition.getName())
+		).findFirst(
+		).orElse(
+			null
+		);
 	}
 
 	private final ParameterGenerator _parameterGenerator =
