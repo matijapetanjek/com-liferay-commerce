@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Igor Beslic
@@ -25,10 +27,21 @@ import java.util.List;
 public class ComponentDefinition {
 
 	public ComponentDefinition(
-		String name, List<PropertyDefinition> propertyDefinitions,
-		String type) {
+		String name, List<PropertyDefinition> propertyDefinitions, String type,
+		String itemsReference) {
 
 		_componentType = ComponentType.SCHEMA;
+		_itemsReference = itemsReference;
+
+		if (_itemsReference != null) {
+			Matcher matcher = _itemsReferenceModelPattern.matcher(
+				_itemsReference);
+
+			if (matcher.find()) {
+				_itemsReferencedModel = matcher.group(2);
+			}
+		}
+
 		_name = name;
 		_parameter = null;
 		_propertyDefinitions = new ArrayList<>(propertyDefinitions);
@@ -43,6 +56,14 @@ public class ComponentDefinition {
 		_type = "array";
 	}
 
+	public String getItemsReference() {
+		return _itemsReference;
+	}
+
+	public String getItemsReferencedModel() {
+		return _itemsReferencedModel;
+	}
+
 	public String getName() {
 		return _name;
 	}
@@ -53,6 +74,10 @@ public class ComponentDefinition {
 
 	public List<PropertyDefinition> getPropertyDefinitions() {
 		return new ArrayList<>(_propertyDefinitions);
+	}
+
+	public String getType() {
+		return _type;
 	}
 
 	public boolean isParameter() {
@@ -98,7 +123,12 @@ public class ComponentDefinition {
 
 	}
 
+	private static final Pattern _itemsReferenceModelPattern = Pattern.compile(
+		"^#/?(\\w+/)+(\\w+)$");
+
 	private final ComponentType _componentType;
+	private String _itemsReference;
+	private String _itemsReferencedModel;
 	private final String _name;
 	private final Parameter _parameter;
 	private final List<PropertyDefinition> _propertyDefinitions;
