@@ -17,6 +17,9 @@ package ${PACKAGE};
 ${MODEL_IMPORT_STATEMENTS}
 
 ${MODEL_IMPORT_STATEMENTS_JAVAX}
+
+import java.util.List;
+
 import javax.annotation.Generated;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
