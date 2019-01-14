@@ -223,6 +223,8 @@ public class OSGiRESTModuleGenerator {
 
 			_writeApplicationSource();
 
+			_writeCollectionDTOSource();
+
 			_writeJsonMessageBodyReaderSource();
 
 			_writeJsonMessageBodyWriterSource();
@@ -332,6 +334,19 @@ public class OSGiRESTModuleGenerator {
 		bndTpl = bndTpl.replace("${BUNDLE_VERSION}", _bundleVersion);
 
 		_writeSource(bndTpl, bndSourcePath);
+	}
+
+	private void _writeCollectionDTOSource() throws IOException {
+		String dtoSource = _getTemplate(_TEMPLATE_FILE_COLLECTION_DTO);
+
+		dtoSource = dtoSource.replace("${PACKAGE}", _modelPackagePath);
+
+		dtoSource = dtoSource.replace("${AUTHOR}", _author);
+
+		String componentSourcePath = _getClassSourcePath(
+			"CollectionDTO.java", _modelPackagePath);
+
+		_writeSource(dtoSource, componentSourcePath);
 	}
 
 	private void _writeGradleSource() throws IOException {
@@ -607,6 +622,9 @@ public class OSGiRESTModuleGenerator {
 		"Application.java.tpl";
 
 	private static final String _TEMPLATE_FILE_BND = "bnd.bnd.tpl";
+
+	private static final String _TEMPLATE_FILE_COLLECTION_DTO =
+		"CollectionDTO.java.tpl";
 
 	private static final String _TEMPLATE_FILE_GRADLE = "build.gradle.tpl";
 
