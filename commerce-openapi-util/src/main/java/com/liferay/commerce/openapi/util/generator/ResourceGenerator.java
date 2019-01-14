@@ -322,7 +322,7 @@ public class ResourceGenerator {
 				schemaComponent = _getSchemaComponent(
 					itemsReferenceModel, schemaComponents);
 
-				sb.append("List<");
+				sb.append("CollectionDTO<");
 				sb.append(schemaComponent.getName());
 				sb.append("DTO> ");
 			}
