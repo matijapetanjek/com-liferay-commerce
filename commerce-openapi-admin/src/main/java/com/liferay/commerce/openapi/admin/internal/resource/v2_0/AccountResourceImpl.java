@@ -28,6 +28,8 @@ import com.liferay.portal.kernel.model.User;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
@@ -92,11 +94,21 @@ public class AccountResourceImpl implements AccountResource {
 
 	@Override
 	@RequiresScope("CommerceOpenApiAdmin.write")
+	public Response updateAccountLogo(String id, Attachment image)
+		throws Exception {
+
+		_accountHelper.updateAccountLogo(id, image, _company);
+
+		return Response.noContent().build();
+	}
+
+	//TODO
+	@Override
+	@RequiresScope("CommerceOpenApiAdmin.write")
 	public AccountDTO upsertAccount(AccountDTO accountDTO) throws Exception {
 		return _accountHelper.upsertAccount(accountDTO);
 	}
 
-	//TODO
 	@Override
 	public OrderDTO upsertSku(
 			String id, Long groupId, OrderDTO orderDTO, Language language)

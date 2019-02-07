@@ -34,6 +34,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+
 /**
  * @author Igor Beslic
  */
@@ -69,6 +72,13 @@ public interface AccountResource {
 	@PUT
 	public Response updateAccount(
 			@PathParam("id") String id, AccountDTO accountDTO)
+		throws Exception;
+
+	@Consumes("multipart/form-data")
+	@Path("/{id}/logo")
+	@POST
+	public Response updateAccountLogo(
+			@PathParam("id") String id, @Multipart("image") Attachment image)
 		throws Exception;
 
 	@Consumes("application/*")
