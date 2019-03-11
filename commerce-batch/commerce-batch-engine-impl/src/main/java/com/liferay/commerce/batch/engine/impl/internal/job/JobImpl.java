@@ -20,9 +20,11 @@ import com.liferay.commerce.batch.engine.api.job.BatchStatus;
 import com.liferay.commerce.batch.engine.api.job.Job;
 import com.liferay.commerce.batch.engine.api.job.JobExecution;
 import com.liferay.commerce.batch.engine.api.job.JobExecutionListener;
-import com.liferay.commerce.batch.engine.api.job.JobInstance;
+import com.liferay.commerce.batch.model.CommerceBatchJob;
+import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,8 +34,10 @@ import java.util.Objects;
 public class JobImpl implements Job {
 
 	public JobImpl(
-		String key, String name, ItemReader itemReader, ItemWriter itemWriter) {
+		CommerceBatchJobLocalService commerceBatchJobLocalService, String key,
+		String name, ItemReader itemReader, ItemWriter itemWriter) {
 
+		_commerceBatchJobLocalService = commerceBatchJobLocalService;
 		_key = Objects.requireNonNull(key);
 		_name = Objects.requireNonNull(name);
 		_itemReader = Objects.requireNonNull(itemReader);
@@ -45,9 +49,8 @@ public class JobImpl implements Job {
 	public void execute(JobExecution jobExecution) throws Exception {
 		Objects.requireNonNull(jobExecution);
 
-		JobInstance jobInstance = jobExecution.getJobInstance();
-
-		jobInstance.setBatchStatus(BatchStatus.STARTED);
+		CommerceBatchJob commerceBatchJob =
+			_startCommerceBatchJob(jobExecution);
 
 		try {
 			for (JobExecutionListener jobExecutionListener :
@@ -72,7 +75,7 @@ public class JobImpl implements Job {
 				jobExecutionListener.afterJob(jobExecution);
 			}
 
-			jobInstance.setBatchStatus(BatchStatus.COMPLETED);
+			_finishCommerceBatchJob(commerceBatchJob, BatchStatus.COMPLETED);
 		}
 		catch (Exception e) {
 			try {
@@ -83,11 +86,31 @@ public class JobImpl implements Job {
 				}
 			}
 			finally {
-				jobInstance.setBatchStatus(BatchStatus.FAILED);
+				_finishCommerceBatchJob(commerceBatchJob, BatchStatus.FAILED);
 			}
 
 			throw e;
 		}
+	}
+
+	private CommerceBatchJob _startCommerceBatchJob(JobExecution jobExecution) {
+		CommerceBatchJob commerceBatchJob = jobExecution.getCommerceBatchJob();
+
+		commerceBatchJob.setStatus(BatchStatus.STARTED.toString());
+		commerceBatchJob.setStartTime(new Date());
+
+		return _commerceBatchJobLocalService.updateCommerceBatchJob(
+			commerceBatchJob);
+	}
+
+	private CommerceBatchJob _finishCommerceBatchJob(
+		CommerceBatchJob commerceBatchJob, BatchStatus batchStatus) {
+
+		commerceBatchJob.setStatus(batchStatus.toString());
+		commerceBatchJob.setEndTime(new Date());
+
+		return _commerceBatchJobLocalService.updateCommerceBatchJob(
+			commerceBatchJob);
 	}
 
 	@Override
@@ -108,6 +131,7 @@ public class JobImpl implements Job {
 			Objects.requireNonNull(jobExecutionListener));
 	}
 
+	private final CommerceBatchJobLocalService _commerceBatchJobLocalService;
 	private final ItemReader _itemReader;
 	private final ItemWriter _itemWriter;
 	private List<JobExecutionListener> _jobExecutionListeners =

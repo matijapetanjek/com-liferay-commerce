@@ -21,7 +21,9 @@ import com.liferay.commerce.batch.engine.api.job.JobFactory;
 
 import java.util.UUID;
 
+import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Ivica Cardic
@@ -33,14 +35,17 @@ public class JobFactoryImpl implements JobFactory {
 	public Job create(
 		String name, ItemReader itemReader, ItemWriter itemWriter) {
 
-		return new JobImpl(_generateJobKey(), name, itemReader, itemWriter);
+		return new JobImpl(
+			_commerceBatchJobLocalService, _generateJobKey(), name, itemReader,
+			itemWriter);
 	}
 
 	@Override
 	public Job create(
 		String id, String name, ItemReader itemReader, ItemWriter itemWriter) {
 
-		return new JobImpl(id, name, itemReader, itemWriter);
+		return new JobImpl(
+			_commerceBatchJobLocalService, id, name, itemReader, itemWriter);
 	}
 
 	private String _generateJobKey() {
@@ -48,5 +53,8 @@ public class JobFactoryImpl implements JobFactory {
 
 		return uuid.toString();
 	}
+
+	@Reference
+	private CommerceBatchJobLocalService _commerceBatchJobLocalService;
 
 }
