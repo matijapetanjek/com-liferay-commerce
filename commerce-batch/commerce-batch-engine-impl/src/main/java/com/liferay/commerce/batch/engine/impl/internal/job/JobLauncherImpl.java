@@ -40,8 +40,12 @@ public class JobLauncherImpl implements JobLauncher {
 		_blockingExecutor = new BlockingExecutor(2, 10);
 	}
 
-	public JobLauncherImpl(BlockingExecutor blockingExecutor) {
+	public JobLauncherImpl(
+		BlockingExecutor blockingExecutor,
+		CommerceBatchJobLocalService commerceBatchJobLocalService) {
+
 		_blockingExecutor = Objects.requireNonNull(blockingExecutor);
+		_commerceBatchJobLocalService = commerceBatchJobLocalService;
 	}
 
 	@Override

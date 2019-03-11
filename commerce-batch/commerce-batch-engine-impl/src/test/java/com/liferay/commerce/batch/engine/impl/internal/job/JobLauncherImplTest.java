@@ -16,16 +16,26 @@ package com.liferay.commerce.batch.engine.impl.internal.job;
 
 import com.liferay.commerce.batch.engine.api.item.ItemReader;
 import com.liferay.commerce.batch.engine.api.item.ItemWriter;
+import com.liferay.commerce.batch.engine.api.job.BatchStatus;
 import com.liferay.commerce.batch.engine.api.job.Job;
 import com.liferay.commerce.batch.engine.api.job.JobExecution;
-import com.liferay.commerce.batch.engine.api.job.JobInstance;
 import com.liferay.commerce.batch.engine.api.job.JobParameters;
 import com.liferay.commerce.batch.engine.impl.internal.concurrent.BlockingExecutor;
 
+import com.liferay.commerce.batch.model.CommerceBatchJob;
+import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.portal.kernel.model.BaseModel;
+import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.service.ServiceContext;
 import org.junit.Assert;
 import org.junit.Test;
 
 import org.mockito.Mockito;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Ivica Cardic
@@ -33,22 +43,53 @@ import org.mockito.Mockito;
 public class JobLauncherImplTest {
 
 	@Test
-	public void testRun() {
-		BlockingExecutor blockingExecutor = Mockito.mock(
-			BlockingExecutor.class);
+	public void testRun() throws Exception {
+		CommerceBatchJob commerceBatchJob =
+			Mockito.mock(CommerceBatchJob.class);
 
-		JobLauncherImpl jobLauncherImpl = new JobLauncherImpl(blockingExecutor);
+		CommerceBatchJobLocalService commerceBatchJobLocalService =
+			Mockito.mock(CommerceBatchJobLocalService.class);
+
+		Mockito.when(
+			commerceBatchJobLocalService.addCommerceBatchJob(
+				Mockito.anyString(), Mockito.anyString())
+		).thenReturn(
+			commerceBatchJob
+		);
+
+		Mockito.when(
+			commerceBatchJobLocalService.updateCommerceBatchJob(
+				commerceBatchJob)
+		).thenReturn(
+			commerceBatchJob
+		);
+
+		JobLauncherImpl jobLauncherImpl = new JobLauncherImpl(
+			new BlockingExecutor(2, 10), commerceBatchJobLocalService);
 
 		Job job = new JobImpl(
-			"id", "name", Mockito.mock(ItemReader.class),
+			commerceBatchJobLocalService, "id", "name",
+			Mockito.mock(ItemReader.class),
 			Mockito.mock(ItemWriter.class));
 
 		JobExecution jobExecution = jobLauncherImpl.run(
 			job, new JobParameters());
 
-		JobInstance jobInstance = jobExecution.getJobInstance();
+//		Thread.sleep(1000);
 
-		Assert.assertTrue(jobLauncherImpl.isJobActive(jobInstance.getJobKey()));
+		commerceBatchJob = jobExecution.getCommerceBatchJob();
+
+		Mockito.verify(
+			commerceBatchJob
+		).setStatus(
+			BatchStatus.STARTED.toString()
+		);
+
+		Mockito.verify(
+			commerceBatchJob
+		).setStatus(
+			BatchStatus.COMPLETED.toString()
+		);
 	}
 
 }

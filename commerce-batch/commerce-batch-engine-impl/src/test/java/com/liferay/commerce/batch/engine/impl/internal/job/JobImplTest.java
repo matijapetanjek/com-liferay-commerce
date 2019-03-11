@@ -19,8 +19,9 @@ import com.liferay.commerce.batch.engine.api.item.ItemWriter;
 import com.liferay.commerce.batch.engine.api.job.BatchStatus;
 import com.liferay.commerce.batch.engine.api.job.JobExecution;
 import com.liferay.commerce.batch.engine.api.job.JobExecutionListener;
-import com.liferay.commerce.batch.engine.api.job.JobInstance;
 
+import com.liferay.commerce.batch.model.CommerceBatchJob;
+import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,10 +35,22 @@ public class JobImplTest {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void setUp() {
+		_commerceBatchJob = Mockito.mock(CommerceBatchJob.class);
+		CommerceBatchJobLocalService commerceBatchJobLocalService =
+			Mockito.mock(CommerceBatchJobLocalService.class);
 		_itemReader = Mockito.mock(ItemReader.class);
 		_itemWriter = Mockito.mock(ItemWriter.class);
 
-		_jobImpl = new JobImpl("id", "name", _itemReader, _itemWriter);
+		Mockito.when(
+			commerceBatchJobLocalService.updateCommerceBatchJob(
+				_commerceBatchJob)
+		).thenReturn(
+			_commerceBatchJob
+		);
+
+		_jobImpl = new JobImpl(
+			commerceBatchJobLocalService, "id", "name", _itemReader,
+			_itemWriter);
 
 		_jobExecutionListener = Mockito.mock(JobExecutionListener.class);
 
@@ -52,9 +65,7 @@ public class JobImplTest {
 			new Exception()
 		);
 
-		JobInstance jobInstance = Mockito.mock(JobInstance.class);
-
-		JobExecution jobExecution = new JobExecution(jobInstance, null);
+		JobExecution jobExecution = new JobExecution(_commerceBatchJob, null);
 
 		try {
 			_jobImpl.execute(jobExecution);
@@ -78,14 +89,15 @@ public class JobImplTest {
 			);
 
 			Mockito.verify(
-				jobInstance
-			).setBatchStatus(
-				BatchStatus.FAILED
+				_commerceBatchJob
+			).setStatus(
+				BatchStatus.STARTED.toString()
 			);
+
 			Mockito.verify(
-				jobInstance
-			).setBatchStatus(
-				BatchStatus.STARTED
+				_commerceBatchJob
+			).setStatus(
+				BatchStatus.FAILED.toString()
 			);
 
 			throw e;
@@ -94,9 +106,7 @@ public class JobImplTest {
 
 	@Test
 	public void testExecuteSuccess() throws Exception {
-		JobInstance jobInstance = Mockito.mock(JobInstance.class);
-
-		JobExecution jobExecution = new JobExecution(jobInstance, null);
+		JobExecution jobExecution = new JobExecution(_commerceBatchJob, null);
 
 		_jobImpl.execute(jobExecution);
 
@@ -124,17 +134,18 @@ public class JobImplTest {
 		);
 
 		Mockito.verify(
-			jobInstance
-		).setBatchStatus(
-			BatchStatus.COMPLETED
+			_commerceBatchJob
+		).setStatus(
+			BatchStatus.COMPLETED.toString()
 		);
 		Mockito.verify(
-			jobInstance
-		).setBatchStatus(
-			BatchStatus.STARTED
+			_commerceBatchJob
+		).setStatus(
+			BatchStatus.STARTED.toString()
 		);
 	}
 
+	private CommerceBatchJob _commerceBatchJob;
 	private ItemReader<Object> _itemReader;
 	private ItemWriter<Object> _itemWriter;
 	private JobExecutionListener _jobExecutionListener;
