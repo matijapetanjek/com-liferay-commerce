@@ -19,13 +19,11 @@ import com.liferay.commerce.batch.engine.api.job.JobExecution;
 import com.liferay.commerce.batch.engine.api.job.JobLauncher;
 import com.liferay.commerce.batch.engine.api.job.JobParameters;
 import com.liferay.commerce.batch.engine.impl.internal.concurrent.BlockingExecutor;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.liferay.commerce.batch.model.CommerceBatchJob;
 import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
+
+import java.util.Objects;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -69,9 +67,9 @@ public class JobLauncherImpl implements JobLauncher {
 		_blockingExecutor.destroy();
 	}
 
+	private final BlockingExecutor _blockingExecutor;
+
 	@Reference
 	private CommerceBatchJobLocalService _commerceBatchJobLocalService;
-
-	private final BlockingExecutor _blockingExecutor;
 
 }

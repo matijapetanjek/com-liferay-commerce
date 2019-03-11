@@ -49,8 +49,8 @@ public class JobImpl implements Job {
 	public void execute(JobExecution jobExecution) throws Exception {
 		Objects.requireNonNull(jobExecution);
 
-		CommerceBatchJob commerceBatchJob =
-			_startCommerceBatchJob(jobExecution);
+		CommerceBatchJob commerceBatchJob = _startCommerceBatchJob(
+			jobExecution);
 
 		try {
 			for (JobExecutionListener jobExecutionListener :
@@ -93,26 +93,6 @@ public class JobImpl implements Job {
 		}
 	}
 
-	private CommerceBatchJob _startCommerceBatchJob(JobExecution jobExecution) {
-		CommerceBatchJob commerceBatchJob = jobExecution.getCommerceBatchJob();
-
-		commerceBatchJob.setStatus(BatchStatus.STARTED.toString());
-		commerceBatchJob.setStartTime(new Date());
-
-		return _commerceBatchJobLocalService.updateCommerceBatchJob(
-			commerceBatchJob);
-	}
-
-	private CommerceBatchJob _finishCommerceBatchJob(
-		CommerceBatchJob commerceBatchJob, BatchStatus batchStatus) {
-
-		commerceBatchJob.setStatus(batchStatus.toString());
-		commerceBatchJob.setEndTime(new Date());
-
-		return _commerceBatchJobLocalService.updateCommerceBatchJob(
-			commerceBatchJob);
-	}
-
 	@Override
 	public String getKey() {
 		return _key;
@@ -129,6 +109,26 @@ public class JobImpl implements Job {
 
 		_jobExecutionListeners.add(
 			Objects.requireNonNull(jobExecutionListener));
+	}
+
+	private CommerceBatchJob _finishCommerceBatchJob(
+		CommerceBatchJob commerceBatchJob, BatchStatus batchStatus) {
+
+		commerceBatchJob.setStatus(batchStatus.toString());
+		commerceBatchJob.setEndTime(new Date());
+
+		return _commerceBatchJobLocalService.updateCommerceBatchJob(
+			commerceBatchJob);
+	}
+
+	private CommerceBatchJob _startCommerceBatchJob(JobExecution jobExecution) {
+		CommerceBatchJob commerceBatchJob = jobExecution.getCommerceBatchJob();
+
+		commerceBatchJob.setStatus(BatchStatus.STARTED.toString());
+		commerceBatchJob.setStartTime(new Date());
+
+		return _commerceBatchJobLocalService.updateCommerceBatchJob(
+			commerceBatchJob);
 	}
 
 	private final CommerceBatchJobLocalService _commerceBatchJobLocalService;

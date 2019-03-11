@@ -21,21 +21,12 @@ import com.liferay.commerce.batch.engine.api.job.Job;
 import com.liferay.commerce.batch.engine.api.job.JobExecution;
 import com.liferay.commerce.batch.engine.api.job.JobParameters;
 import com.liferay.commerce.batch.engine.impl.internal.concurrent.BlockingExecutor;
-
 import com.liferay.commerce.batch.model.CommerceBatchJob;
 import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
-import com.liferay.expando.kernel.model.ExpandoBridge;
-import com.liferay.portal.kernel.model.BaseModel;
-import com.liferay.portal.kernel.model.CacheModel;
-import com.liferay.portal.kernel.service.ServiceContext;
-import org.junit.Assert;
+
 import org.junit.Test;
 
 import org.mockito.Mockito;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * @author Ivica Cardic
@@ -44,8 +35,8 @@ public class JobLauncherImplTest {
 
 	@Test
 	public void testRun() throws Exception {
-		CommerceBatchJob commerceBatchJob =
-			Mockito.mock(CommerceBatchJob.class);
+		CommerceBatchJob commerceBatchJob = Mockito.mock(
+			CommerceBatchJob.class);
 
 		CommerceBatchJobLocalService commerceBatchJobLocalService =
 			Mockito.mock(CommerceBatchJobLocalService.class);
@@ -69,13 +60,12 @@ public class JobLauncherImplTest {
 
 		Job job = new JobImpl(
 			commerceBatchJobLocalService, "id", "name",
-			Mockito.mock(ItemReader.class),
-			Mockito.mock(ItemWriter.class));
+			Mockito.mock(ItemReader.class), Mockito.mock(ItemWriter.class));
 
 		JobExecution jobExecution = jobLauncherImpl.run(
 			job, new JobParameters());
 
-//		Thread.sleep(1000);
+		//		Thread.sleep(1000);
 
 		commerceBatchJob = jobExecution.getCommerceBatchJob();
 

@@ -23,7 +23,9 @@ import java.util.Objects;
  */
 public class JobExecution {
 
-	public JobExecution(CommerceBatchJob commerceBatchJob, JobParameters jobParameters) {
+	public JobExecution(
+		CommerceBatchJob commerceBatchJob, JobParameters jobParameters) {
+
 		_commerceBatchJob = Objects.requireNonNull(commerceBatchJob);
 		_jobParameters = jobParameters;
 	}

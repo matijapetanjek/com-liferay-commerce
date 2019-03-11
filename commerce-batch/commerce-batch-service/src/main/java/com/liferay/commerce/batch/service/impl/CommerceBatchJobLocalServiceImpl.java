@@ -39,8 +39,7 @@ public class CommerceBatchJobLocalServiceImpl
 	@Override
 	public CommerceBatchJob addCommerceBatchJob(String key, String name) {
 		CommerceBatchJob commerceBatchJob = commerceBatchJobPersistence.create(
-			counterLocalService.increment(
-				CommerceBatchJob.class.getName()));
+			counterLocalService.increment(CommerceBatchJob.class.getName()));
 
 		commerceBatchJob.setKey(key);
 		commerceBatchJob.setName(name);
@@ -56,4 +55,5 @@ public class CommerceBatchJobLocalServiceImpl
 
 		return commerceBatchJob.getStatus();
 	}
+
 }

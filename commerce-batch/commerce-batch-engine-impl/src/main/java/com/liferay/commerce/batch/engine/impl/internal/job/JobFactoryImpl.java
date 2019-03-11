@@ -18,10 +18,10 @@ import com.liferay.commerce.batch.engine.api.item.ItemReader;
 import com.liferay.commerce.batch.engine.api.item.ItemWriter;
 import com.liferay.commerce.batch.engine.api.job.Job;
 import com.liferay.commerce.batch.engine.api.job.JobFactory;
+import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
 
 import java.util.UUID;
 
-import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

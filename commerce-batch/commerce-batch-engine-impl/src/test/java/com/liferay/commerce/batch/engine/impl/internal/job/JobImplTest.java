@@ -19,9 +19,9 @@ import com.liferay.commerce.batch.engine.api.item.ItemWriter;
 import com.liferay.commerce.batch.engine.api.job.BatchStatus;
 import com.liferay.commerce.batch.engine.api.job.JobExecution;
 import com.liferay.commerce.batch.engine.api.job.JobExecutionListener;
-
 import com.liferay.commerce.batch.model.CommerceBatchJob;
 import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
+
 import org.junit.Before;
 import org.junit.Test;
 

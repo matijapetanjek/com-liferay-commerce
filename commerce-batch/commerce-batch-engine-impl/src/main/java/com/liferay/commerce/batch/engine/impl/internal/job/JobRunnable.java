@@ -16,11 +16,9 @@ package com.liferay.commerce.batch.engine.impl.internal.job;
 
 import com.liferay.commerce.batch.engine.api.job.Job;
 import com.liferay.commerce.batch.engine.api.job.JobExecution;
-import com.liferay.commerce.batch.model.CommerceBatchJob;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
