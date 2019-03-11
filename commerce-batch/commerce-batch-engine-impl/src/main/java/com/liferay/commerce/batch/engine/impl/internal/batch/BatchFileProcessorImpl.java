@@ -27,7 +27,9 @@ import com.liferay.commerce.batch.engine.api.job.JobExecution;
 import com.liferay.commerce.batch.engine.api.job.JobFactory;
 import com.liferay.commerce.batch.engine.api.job.JobLauncher;
 import com.liferay.commerce.batch.engine.impl.internal.job.JobExecutionListenerImpl;
+import com.liferay.commerce.batch.exception.NoSuchBatchJobException;
 import com.liferay.commerce.batch.model.CommerceBatchJob;
+import com.liferay.commerce.batch.service.CommerceBatchJobLocalService;
 import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppService;
@@ -65,8 +67,10 @@ import org.osgi.service.component.annotations.Reference;
 public class BatchFileProcessorImpl implements BatchFileProcessor {
 
 	@Override
-	public boolean getBatchExecutionStatus(String key) {
-		return _jobLauncher.isJobActive(key);
+	public String getBatchExecutionStatus(String key)
+		throws NoSuchBatchJobException {
+
+		return _commerceBatchJobLocalService.getStatus(key);
 	}
 
 	public Map<String, String> process(String fileName, InputStream inputStream)
@@ -252,6 +256,9 @@ public class BatchFileProcessorImpl implements BatchFileProcessor {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		BatchFileProcessorImpl.class);
+
+	@Reference
+	private CommerceBatchJobLocalService _commerceBatchJobLocalService;
 
 	@Reference
 	private DLAppService _dlAppService;

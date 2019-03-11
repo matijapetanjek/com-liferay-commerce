@@ -45,11 +45,6 @@ public class JobLauncherImpl implements JobLauncher {
 	}
 
 	@Override
-	public boolean isJobActive(String key) {
-		return _jobExecutionMap.containsKey(Objects.requireNonNull(key));
-	}
-
-	@Override
 	public JobExecution run(Job job, JobParameters jobParameters) {
 		Objects.requireNonNull(job);
 
@@ -60,10 +55,7 @@ public class JobLauncherImpl implements JobLauncher {
 		JobExecution jobExecution = new JobExecution(
 			commerceBatchJob, jobParameters);
 
-		_blockingExecutor.execute(
-			new JobRunnable(job, jobExecution, _jobExecutionMap));
-
-		_jobExecutionMap.put(job.getKey(), jobExecution);
+		_blockingExecutor.execute(new JobRunnable(job, jobExecution));
 
 		return jobExecution;
 	}
@@ -77,7 +69,5 @@ public class JobLauncherImpl implements JobLauncher {
 	private CommerceBatchJobLocalService _commerceBatchJobLocalService;
 
 	private final BlockingExecutor _blockingExecutor;
-	private final Map<String, JobExecution> _jobExecutionMap =
-		new ConcurrentHashMap<>();
 
 }

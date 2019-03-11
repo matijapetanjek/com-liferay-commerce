@@ -28,13 +28,9 @@ import java.util.Objects;
  */
 public class JobRunnable implements Runnable {
 
-	public JobRunnable(
-		Job job, JobExecution jobExecution,
-		Map<String, JobExecution> jobExecutionMap) {
-
+	public JobRunnable(Job job, JobExecution jobExecution) {
 		_job = Objects.requireNonNull(job);
 		_jobExecution = Objects.requireNonNull(jobExecution);
-		_jobExecutionMap = Objects.requireNonNull(jobExecutionMap);
 	}
 
 	@Override
@@ -63,11 +59,6 @@ public class JobRunnable implements Runnable {
 						"Job %s completed",
 						_jobExecution.getCommerceBatchJob()));
 			}
-
-			CommerceBatchJob commerceBatchJob =
-				_jobExecution.getCommerceBatchJob();
-
-			_jobExecutionMap.remove(commerceBatchJob.getKey());
 		}
 	}
 
@@ -75,6 +66,5 @@ public class JobRunnable implements Runnable {
 
 	private final Job _job;
 	private final JobExecution _jobExecution;
-	private final Map<String, JobExecution> _jobExecutionMap;
 
 }
